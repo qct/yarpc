@@ -1,0 +1,3 @@
+org.yarpc.support.Hello=\
+org.yarpc.support.HelloImpl,\
+org.yarpc.support.HelloImpl2
