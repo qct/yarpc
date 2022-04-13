@@ -1,5 +1,7 @@
 package org.yarpc.core.transport.handler;
 
+import static org.yarpc.core.transport.ClientImpl.RESPONSE_HOLDER;
+
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -7,7 +9,6 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yarpc.core.transport.Response;
-import org.yarpc.core.transport.ResponseHolder;
 
 /**
  * <p>Created by qdd on 2022/4/10.
@@ -20,9 +21,9 @@ public class YaRpcClientHandler extends SimpleChannelInboundHandler<Response> {
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, Response msg) {
         logger.info("Handle response...");
-        CompletableFuture<Response> responseCompletableFuture = ResponseHolder.get(msg.getRequestId());
-        if (responseCompletableFuture != null) {
-            responseCompletableFuture.complete(msg);
+        CompletableFuture<Response> future = RESPONSE_HOLDER.get(msg.getReqId());
+        if (future != null) {
+            future.complete(msg);
         }
     }
 

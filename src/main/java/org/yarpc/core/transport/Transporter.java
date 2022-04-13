@@ -5,5 +5,5 @@ package org.yarpc.core.transport;
  */
 public interface Transporter {
 
-    Response sendToRemote(Request request);
+    Response sendToRemote(Request request, long timeout);
 }

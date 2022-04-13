@@ -1,8 +1,12 @@
 package org.yarpc;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.yarpc.core.exception.YaRpcException;
 import org.yarpc.core.transport.Client;
 import org.yarpc.core.transport.ClientImpl;
 import org.yarpc.core.transport.Server;
@@ -16,8 +20,8 @@ import org.yarpc.support.HelloImpl;
 public class YaRpcClientTest {
 
     private static Server server;
-    private String ip = "127.0.0.1";
-    private int port = 8081;
+    private final String ip = "127.0.0.1";
+    private final int port = 8081;
 
     @BeforeAll
     static void beforeAll() {
@@ -31,10 +35,18 @@ public class YaRpcClientTest {
     }
 
     @Test
-    void init() {
+    void rpcCallWithException() {
         Client client = new ClientImpl(ip, port);
         Hello hello = client.proxyInstance(Hello.class);
-        String alex = hello.sayHi("alex");
-        System.out.println("=====================" + alex);
+        assertThatExceptionOfType(YaRpcException.class)
+            .isThrownBy(() -> hello.sayHi("alex")).withMessage("hello Exception");
+    }
+
+    @Test
+    void rpcCallShouldSuccess() {
+        Client client = new ClientImpl(ip, port);
+        Hello hello = client.proxyInstance(Hello.class);
+        String hiJohn = hello.sayHi("John");
+        assertThat(hiJohn).isEqualTo("hello John");
     }
 }

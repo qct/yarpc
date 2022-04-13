@@ -11,8 +11,11 @@ public class HelloImpl implements Hello {
     private static final Logger logger = LoggerFactory.getLogger(HelloImpl.class);
 
     @Override
-    public String sayHi(String hi) {
-        logger.info("hello " + hi);
-        return "hello " + hi;
+    public String sayHi(String name) {
+        if (name.contains("a")) {
+            throw new RuntimeException("hello Exception");
+        }
+        logger.info("hello " + name);
+        return "hello " + name;
     }
 }

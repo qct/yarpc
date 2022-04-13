@@ -45,16 +45,16 @@ public class ServerImpl implements Server {
     public void start() {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         this.bossGroup = new NioEventLoopGroup(1,
-            new ThreadFactoryBuilder().setNameFormat("yaRpc-server-boss-pool-%d").setDaemon(true).build());
-        this.workerGroup = new NioEventLoopGroup(YaRpcConstant.DEFAULT_WORKER_THREADS,
-            new ThreadFactoryBuilder().setDaemon(true).setNameFormat("yaRpc-server-worker-pool-%d").build());
+            new ThreadFactoryBuilder().setNameFormat(YaRpcConstant.SERVER_BOSS_POOL_NAME).setDaemon(true).build());
+        this.workerGroup = new NioEventLoopGroup(YaRpcConstant.DEFAULT_IO_THREADS,
+            new ThreadFactoryBuilder().setDaemon(true).setNameFormat(YaRpcConstant.SERVER_WORKER_POOL_NAME).build());
         serverBootstrap.group(this.bossGroup, this.workerGroup)
             .channel(NioServerSocketChannel.class)
             .childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 protected void initChannel(SocketChannel ch) throws Exception {
                     ch.pipeline().addLast(new LoggingHandler(LogLevel.INFO))
-                        .addLast(new ProtocolDecoder(10 * 1024 * 1024, new KryoSerializer()))
+                        .addLast(new ProtocolDecoder(new KryoSerializer()))
                         .addLast(new ProtocolEncoder(new KryoSerializer()))
                         .addLast(new YaRpcServerHandler(serviceImpl));
                 }
