@@ -67,13 +67,12 @@ public class NettyClientTransporter implements Transporter {
             }
             return response;
         } catch (InterruptedException | ExecutionException e) {
-            String msg = "waiting for response Exception, service: " + request.getClazz().getName() + " method "
-                + request.getMethod();
+            String msg = "waiting for response Exception, service: "
+                    + request.getClazz().getName() + " method " + request.getMethod();
             logger.warn(msg);
             throw new ClientSideException(msg);
         } catch (TimeoutException e) {
-            String msg =
-                "service " + request.getClazz().getName() + "." + request.getMethod() + "(...) timeout exceed "
+            String msg = "service " + request.getClazz().getName() + "." + request.getMethod() + "(...) timeout exceed "
                     + timeout + " ms";
             logger.warn(msg);
             throw new RequestTimeoutException(msg);
@@ -84,25 +83,27 @@ public class NettyClientTransporter implements Transporter {
 
     private Channel bootstrapClient() {
         Bootstrap bootstrap = new Bootstrap();
-        NioEventLoopGroup eventLoopGroup = new NioEventLoopGroup(1,
-            new ThreadFactoryBuilder().setNameFormat(YaRpcConstant.CLIENT_WORKER_POOL_NAME).build());
-        bootstrap.channel(NioSocketChannel.class)
-            .group(eventLoopGroup)
-            .handler(new ChannelInitializer<Channel>() {
-                @Override
-                protected void initChannel(Channel channel) throws Exception {
-                    channel.pipeline()
-                        .addLast(new LoggingHandler(LogLevel.INFO)) //Duplex
+        NioEventLoopGroup eventLoopGroup = new NioEventLoopGroup(
+                1,
+                new ThreadFactoryBuilder()
+                        .setNameFormat(YaRpcConstant.CLIENT_WORKER_POOL_NAME)
+                        .build());
+        bootstrap.channel(NioSocketChannel.class).group(eventLoopGroup).handler(new ChannelInitializer<Channel>() {
+            @Override
+            protected void initChannel(Channel channel) throws Exception {
+                channel.pipeline()
+                        .addLast(new LoggingHandler(LogLevel.INFO)) // Duplex
                         .addLast(new ProtocolDecoder(new KryoSerializer())) // inbound
                         .addLast(new ProtocolEncoder(new KryoSerializer())) // outbound
                         .addLast(new YaRpcClientHandler()); // inbound
-                }
-            });
+            }
+        });
 
         try {
-            final ChannelFuture channelFuture = bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
-                .option(ChannelOption.TCP_NODELAY, true)
-                .connect(this.ip, this.port);
+            final ChannelFuture channelFuture = bootstrap
+                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
+                    .option(ChannelOption.TCP_NODELAY, true)
+                    .connect(this.ip, this.port);
             final Channel channel = channelFuture.channel();
             addChannelListeners(channelFuture, channel);
             channelFuture.sync();

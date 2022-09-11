@@ -23,11 +23,7 @@ public class ProtocolDecoder extends LengthFieldBasedFrameDecoder {
     }
 
     public ProtocolDecoder(int maxFrameLength, Serializer serializer) {
-        super(maxFrameLength,
-            0,
-            MSG_PROTOCOL_HEADER_FIELD_LENGTH,
-            0,
-            MSG_PROTOCOL_HEADER_FIELD_LENGTH);
+        super(maxFrameLength, 0, MSG_PROTOCOL_HEADER_FIELD_LENGTH, 0, MSG_PROTOCOL_HEADER_FIELD_LENGTH);
         this.serializer = serializer;
     }
 

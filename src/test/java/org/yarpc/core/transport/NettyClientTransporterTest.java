@@ -21,9 +21,11 @@ class NettyClientTransporterTest {
     @Test
     void sendToRemoteWithClientSideException() {
         Transporter transporter = new NettyClientTransporter("127.0.0.1", 8081);
-        Assertions.assertThatExceptionOfType(ClientSideException.class).isThrownBy(() -> {
-            transporter.sendToRemote(new Request(), YaRpcConstant.CLIENT_TIMEOUT_MILLIS);
-        }).withMessage("Channel is not available now");
+        Assertions.assertThatExceptionOfType(ClientSideException.class)
+                .isThrownBy(() -> {
+                    transporter.sendToRemote(new Request(), YaRpcConstant.CLIENT_TIMEOUT_MILLIS);
+                })
+                .withMessage("Channel is not available now");
     }
 
     @Test
@@ -32,10 +34,19 @@ class NettyClientTransporterTest {
         when(channel.remoteAddress()).thenReturn(new InetSocketAddress("127.0.0.1", 8081));
         Transporter transporter = new NettyClientTransporter(channel);
 
-        Assertions.assertThatExceptionOfType(RequestTimeoutException.class).isThrownBy(() -> {
-            Method method = Hello.class.getDeclaredMethod("sayHi", String.class);
-            transporter.sendToRemote(new Request(1L, Hello.class, method.getName(), method.getParameterTypes(),
-                new String[]{"Alex"}, System.currentTimeMillis()), 1);
-        }).withMessage("service org.yarpc.support.Hello.sayHi(...) timeout exceed 1 ms");
+        Assertions.assertThatExceptionOfType(RequestTimeoutException.class)
+                .isThrownBy(() -> {
+                    Method method = Hello.class.getDeclaredMethod("sayHi", String.class);
+                    transporter.sendToRemote(
+                            new Request(
+                                    1L,
+                                    Hello.class,
+                                    method.getName(),
+                                    method.getParameterTypes(),
+                                    new String[] {"Alex"},
+                                    System.currentTimeMillis()),
+                            1);
+                })
+                .withMessage("service org.yarpc.support.Hello.sayHi(...) timeout exceed 1 ms");
     }
 }

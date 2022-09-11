@@ -30,11 +30,10 @@ public final class YaRpcServiceLoader {
     public static final String SPI_RESOURCE_LOCATION = "META-INF/yarpc.spi";
 
     private static final Logger logger = LoggerFactory.getLogger(YaRpcServiceLoader.class);
-    static final Map<ClassLoader, Map<String, List<String>>> cache = new MapMaker().weakKeys().makeMap();
+    static final Map<ClassLoader, Map<String, List<String>>> cache =
+            new MapMaker().weakKeys().makeMap();
 
-
-    private YaRpcServiceLoader() {
-    }
+    private YaRpcServiceLoader() {}
 
     public static <T> List<T> loadYaRpcSPIs(Class<T> spiType, @Nullable ClassLoader classLoader) {
         Preconditions.checkNotNull(spiType, "'spiType' must not be null");
@@ -50,7 +49,7 @@ public final class YaRpcServiceLoader {
         for (String implementationName : implementationNames) {
             result.add(instantiateSpi(implementationName, spiType, classLoaderToUse));
         }
-        //TODO support order
+        // TODO support order
         // AnnotationAwareOrderComparator.sort(result);
         return result;
     }
@@ -93,47 +92,45 @@ public final class YaRpcServiceLoader {
                 for (Map.Entry<?, ?> entry : properties.entrySet()) {
                     String spiTypeName = ((String) entry.getKey()).trim();
                     List<String> spiImplementationNames =
-                        Splitter.on(",").trimResults().splitToList((String) entry.getValue());
+                            Splitter.on(",").trimResults().splitToList((String) entry.getValue());
                     for (String spiImplementationName : spiImplementationNames) {
                         result.computeIfAbsent(spiTypeName, key -> new ArrayList<>())
-                            .add(spiImplementationName);
+                                .add(spiImplementationName);
                     }
                 }
             }
 
             // Replace all lists with unmodifiable lists containing unique elements
-            result.replaceAll((spiType, implementations) -> implementations.stream().distinct()
-                .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList)));
+            result.replaceAll((spiType, implementations) -> implementations.stream()
+                    .distinct()
+                    .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList)));
             cache.put(classLoader, result);
         } catch (IOException ex) {
-            throw new IllegalArgumentException("Unable to load SPIs from location [" +
-                SPI_RESOURCE_LOCATION + "]", ex);
+            throw new IllegalArgumentException("Unable to load SPIs from location [" + SPI_RESOURCE_LOCATION + "]", ex);
         }
         return result;
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T instantiateSpi(String spiImplementationName, Class<T> spiType,
-        ClassLoader classLoader) {
+    private static <T> T instantiateSpi(String spiImplementationName, Class<T> spiType, ClassLoader classLoader) {
         try {
             Class<?> spiImplementationClass = Class.forName(spiImplementationName, false, classLoader);
             if (!spiType.isAssignableFrom(spiImplementationClass)) {
-                throw new IllegalArgumentException(
-                    "Class [" + spiImplementationName + "] is not assignable to SPI type ["
-                        + spiType.getName() + "]");
+                throw new IllegalArgumentException("Class [" + spiImplementationName
+                        + "] is not assignable to SPI type [" + spiType.getName() + "]");
             }
             Constructor<?> ctor = spiImplementationClass.getDeclaredConstructor();
-            if ((!Modifier.isPublic(ctor.getModifiers()) ||
-                !Modifier.isPublic(ctor.getDeclaringClass().getModifiers())) && !ctor.isAccessible()) {
+            if ((!Modifier.isPublic(ctor.getModifiers())
+                            || !Modifier.isPublic(ctor.getDeclaringClass().getModifiers()))
+                    && !ctor.isAccessible()) {
                 ctor.setAccessible(true);
             }
             return (T) ctor.newInstance();
         } catch (Throwable ex) {
             throw new IllegalArgumentException(
-                "Unable to instantiate SPI class [" + spiImplementationName + "] for SPI type ["
-                    + spiType.getName() + "]",
-                ex);
+                    "Unable to instantiate SPI class [" + spiImplementationName + "] for SPI type [" + spiType.getName()
+                            + "]",
+                    ex);
         }
     }
-
 }

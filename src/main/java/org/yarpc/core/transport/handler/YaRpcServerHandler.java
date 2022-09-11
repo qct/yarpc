@@ -25,10 +25,16 @@ public class YaRpcServerHandler extends SimpleChannelInboundHandler<Request> {
     private static final Logger logger = LoggerFactory.getLogger(YaRpcServerHandler.class);
 
     private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(
-        Runtime.getRuntime().availableProcessors(), YaRpcConstant.DEFAULT_BIZ_THREADS, 60, TimeUnit.SECONDS,
-        new LinkedBlockingQueue<>(1),
-        new ThreadFactoryBuilder().setNameFormat(YaRpcConstant.SERVER_BIZ_POOL_NAME).setDaemon(true).build(),
-        new AbortPolicy());
+            Runtime.getRuntime().availableProcessors(),
+            YaRpcConstant.DEFAULT_BIZ_THREADS,
+            60,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(1),
+            new ThreadFactoryBuilder()
+                    .setNameFormat(YaRpcConstant.SERVER_BIZ_POOL_NAME)
+                    .setDaemon(true)
+                    .build(),
+            new AbortPolicy());
 
     private final Object service;
 
@@ -50,13 +56,16 @@ public class YaRpcServerHandler extends SimpleChannelInboundHandler<Request> {
                 Object resp = method.invoke(service, params);
                 response.setResp(resp);
             } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-                logger.error("Server side error while executing [{}.{}(...)]", msg.getClazz().getName(),
-                    msg.getMethod());
+                logger.error(
+                        "Server side error while executing [{}.{}(...)]",
+                        msg.getClazz().getName(),
+                        msg.getMethod());
                 String eMsg;
                 Class<? extends Throwable> eClass;
                 if (e instanceof InvocationTargetException) {
                     eMsg = ((InvocationTargetException) e).getTargetException().getMessage();
-                    eClass = ((InvocationTargetException) e).getTargetException().getClass();
+                    eClass =
+                            ((InvocationTargetException) e).getTargetException().getClass();
                 } else {
                     eMsg = e.getMessage();
                     eClass = e.getClass();

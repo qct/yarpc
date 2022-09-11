@@ -35,8 +35,13 @@ public class ClientImpl implements Client {
     public Response sendMessage(Class<?> clazz, Method method, Object[] args) {
         Preconditions.checkNotNull(clazz);
         Preconditions.checkNotNull(method);
-        Request request = new Request(REQUEST_ID.incrementAndGet(), clazz, method.getName(), method.getParameterTypes(),
-            args, System.currentTimeMillis());
+        Request request = new Request(
+                REQUEST_ID.incrementAndGet(),
+                clazz,
+                method.getName(),
+                method.getParameterTypes(),
+                args,
+                System.currentTimeMillis());
         return transporter.sendToRemote(request, this.requestTimeout);
     }
 
@@ -49,12 +54,10 @@ public class ClientImpl implements Client {
                 try {
                     return sendMessage(serviceInterface, method, args).getResp();
                 } catch (YaRpcException e) {
-                    logger.error("Exception while calling [{}.{}(...)]", serviceInterface.getName(),
-                        method.getName());
+                    logger.error("Exception while calling [{}.{}(...)]", serviceInterface.getName(), method.getName());
                     throw e;
                 }
             }
         });
     }
-
 }

@@ -39,7 +39,8 @@ public class YaRpcClientTest {
         Client client = new ClientImpl(ip, port);
         Hello hello = client.proxyInstance(Hello.class);
         assertThatExceptionOfType(YaRpcException.class)
-            .isThrownBy(() -> hello.sayHi("alex")).withMessage("hello Exception");
+                .isThrownBy(() -> hello.sayHi("alex"))
+                .withMessage("hello Exception");
     }
 
     @Test
